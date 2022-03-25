@@ -7,25 +7,36 @@ Console.WriteLine("Hello, World!");
 var trie = new Trie();
 LoadWordLists();
 
-//test word lookup
-var sw2 = new Stopwatch();
-sw2.Start();
-var theWord = "Mercutio, kinsman to the Prince and friend to Romeo";
-var found = trie.Search(theWord);
-sw2.Stop();
-
-if(found != null)
-{
-    Console.WriteLine($"found '{theWord}' in {sw2.ElapsedMilliseconds} milliseconds.");
-    Console.WriteLine($"found '{theWord}' in {sw2.ElapsedTicks} ticks.");
-}
-else
-{
-    Console.WriteLine("Did not find the word");
-}
+var search = "a";
+Search(search);
+Search(search);
+Search(search);
+Search(search);
+Search(search);
 
 Console.WriteLine("End.");
 
+
+void Search(string word)
+{
+    //test word lookup
+    var sw2 = new Stopwatch();
+    sw2.Start();
+    //var theWord = "Mercutio, kinsman to the Prince and friend to Romeo";
+   
+    var found = trie.Search(word, true);
+    sw2.Stop();
+
+    if(found != null)
+    {
+        Console.WriteLine($"found '{word}' in {sw2.ElapsedTicks} ticks at a depth of { found.Depth }.");
+        Console.WriteLine($"Suggested Completion: { word + found.Completions.FirstOrDefault() }");
+    }
+    else
+    {
+        Console.WriteLine("Did not find the word");
+    }
+}
 
 
 void LoadWordLists()

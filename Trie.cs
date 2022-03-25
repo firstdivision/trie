@@ -8,6 +8,7 @@ public class Trie
     }
 
     private TrieNode RootNode;
+    private Random rand = new Random();
 
     public void Add(string value)
     {
@@ -15,10 +16,10 @@ public class Trie
         Add(value, RootNode);
     }
 
-    public TrieNode? Search(string value)
+    public TrieSearchResult Search(string value, bool withSuggestioons)
     {
         value = value.ToLower();
-        return Search(value, RootNode);
+        return Search(value, RootNode, withSuggestioons, 0);
     }
 
 
@@ -53,24 +54,67 @@ public class Trie
 
 
 
-    private TrieNode? Search(string value, TrieNode node)
+    private TrieSearchResult Search(string value, TrieNode node, bool withSuggestions, int depth)
     {
-        if (value == null || node == null) return null;
+        if (value == null || node == null) return new TrieSearchResult{
+            Depth = depth
+        };
+
         var firstChar = value.Substring(0, 1);
         var remainder = value.Substring(1, value.Length - 1);
-
-        //if  (remainder == null || remainder == "") return node;
 
         //serch for next child node and descend if found
         var child = node.Nodes.FirstOrDefault(n => n.Value == firstChar);
         if (child != null)
         {
-            if(remainder == string.Empty) return child;
-            return Search(remainder, child); //keep looking
+            if(remainder == string.Empty)
+            {
+                var searchResult = new TrieSearchResult{
+                    Depth = depth,
+                    IsFound = true,
+                    Node = child
+                };
+
+                if (withSuggestions)
+                {
+                    //go get random result
+                    searchResult.Completions.Add(RandomComplete(node, "", true));
+                }
+                return searchResult;
+                
+            }
+
+            return Search(remainder, child, withSuggestions, depth + 1); //keep looking
         }
 
-        return null; //NOT FOUND
+        return new TrieSearchResult{
+            Depth = depth
+        }; //NOT FOUND
 
+    }
+
+    public string RandomComplete(TrieNode node, string suffix, bool isFirst)
+    {
+        //var result = "";
+        if (node.Nodes.Count == 0)
+        {
+            return suffix;
+        }
+        else //select a random node and descend
+        {
+            var nodeCount = node.Nodes.Count;
+            var nodePosition = rand.Next(0, nodeCount);
+            var newNode = node.Nodes.Skip(nodePosition).Take(1).First();
+
+            if(isFirst)
+            {
+                return RandomComplete(newNode, suffix, false);     
+            }
+            else
+            {
+                return newNode.Value + RandomComplete(newNode, suffix, false);
+            }
+        }
     }
 }
 
@@ -85,4 +129,18 @@ public class TrieNode
 
     public string Value { get; set; } = "";
 
+}
+
+
+public class TrieSearchResult
+{
+    public TrieSearchResult()
+    {
+        this.Completions = new List<string>();
+    }
+
+    public bool IsFound { get; set; }
+    public TrieNode Node { get; set; } = null!;
+    public int Depth { get; set; }
+    public List<string> Completions { get; set; }
 }
