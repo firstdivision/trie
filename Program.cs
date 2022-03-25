@@ -2,36 +2,22 @@
 using System.Diagnostics;
 using System.Text.Json;
 
-var trie = new Trie();
-
 Console.WriteLine("Hello, World!");
 
-//get wordlists
-var path =  System.IO.Path.Join(Environment.CurrentDirectory, "word-list.json");
-var json = System.IO.File.ReadAllText(path);
-var words = JsonSerializer.Deserialize<List<string>>(json);
-AddWords(words);
+var trie = new Trie();
+LoadWordLists();
 
-
-path =  System.IO.Path.Join(Environment.CurrentDirectory, "milestonk-words.txt");
-var text = System.IO.File.ReadAllText(path);
-words = text.Split(Environment.NewLine).Select(t => t.Trim()).ToList();
-AddWords(words);
-
-
-
-
-
-var sw = new Stopwatch();
-sw.Reset();
-sw.Start();
-var theWord = "tomorrow";
+//test word lookup
+var sw2 = new Stopwatch();
+sw2.Start();
+var theWord = "Mercutio, kinsman to the Prince and friend to Romeo";
 var found = trie.Search(theWord);
-sw.Stop();
+sw2.Stop();
 
 if(found != null)
 {
-    Console.WriteLine($"found '{theWord}' in {sw.ElapsedMilliseconds} milliseconds.");
+    Console.WriteLine($"found '{theWord}' in {sw2.ElapsedMilliseconds} milliseconds.");
+    Console.WriteLine($"found '{theWord}' in {sw2.ElapsedTicks} ticks.");
 }
 else
 {
@@ -40,6 +26,27 @@ else
 
 Console.WriteLine("End.");
 
+
+
+void LoadWordLists()
+{
+    //get wordlists
+    var path =  System.IO.Path.Join(Environment.CurrentDirectory, "word-list.json");
+    var json = System.IO.File.ReadAllText(path);
+    var words = JsonSerializer.Deserialize<List<string>>(json);
+    AddWords(words);
+
+
+    path =  System.IO.Path.Join(Environment.CurrentDirectory, "milestonk-words.txt");
+    var text = System.IO.File.ReadAllText(path);
+    words = text.Split(Environment.NewLine).Select(t => t.Trim()).ToList();
+    AddWords(words);
+
+    path =  System.IO.Path.Join(Environment.CurrentDirectory, "romeo-and-juliet.txt");
+    text = System.IO.File.ReadAllText(path);
+    words = text.Split(Environment.NewLine).Select(t => t.Trim()).ToList();
+    AddWords(words);
+}
 void AddWords(List<string>? words)
 {
     var sw = new Stopwatch();
@@ -48,6 +55,7 @@ void AddWords(List<string>? words)
     {
         foreach (var word in words)
         {
+            if (word == string.Empty) continue;
             trie.Add(word);
         }
     }
